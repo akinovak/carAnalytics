@@ -28,10 +28,12 @@
 					* delete_object
 					* run_query
 
-	+ scrape
-		- scrape_interface.py
-		+ scrapy
-			- scrapy.py
+	+ scraper
+		- scrape_interface.py (ako ima zajednickih funkcija za sve scraper-e)
+		+ polovni_automobili
+			- scraper.py
+		+ moj_auto
+			- scraper.py
 
 + controllers
 	+ car_storage
@@ -42,8 +44,4 @@
 			* delete_car
 
 	+ car_scrape
-		- car_scraper.py ?? (Ako ima nesto zajednicko ovima ispod)
-		+ polovni_automobili
-			- scraper.py
-		+ moj_auto
-			- scraper.py
+		- car_scraper.py  (injectuje mu se konkretna implementacija scrapera)
