@@ -19,3 +19,4 @@ class MongoAdapter(StorageInterface):
 
     def get_object(self, obj, collection):
         return self.db[collection].find_one(obj)
+

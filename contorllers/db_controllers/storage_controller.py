@@ -8,5 +8,8 @@ class StorageController:
     def get(self, obj, collection):
         return self.adapter.get_object(obj, collection)
 
+    def delete(self, obj, collection):
+        return self.adapter.delete_object(obj, collection)
+
     def update(self, obj_match, obj_update, collection):
         self.adapter.update_object(obj_match, obj_update, collection)
