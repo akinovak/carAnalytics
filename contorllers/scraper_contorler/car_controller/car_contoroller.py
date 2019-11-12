@@ -6,6 +6,10 @@ class CarContorller:
     def check_object(self, obj, collection):
         x = self.storage_controller.get(obj, collection)
         if x is None:
-            self.storage_controller.insert(obj, collection)
+            return False
         else:
             self.storage_controller.update({'link': obj['link']}, obj, collection)
+            return True
+
+    def insert_object(self, obj, collection):
+        self.storage_controller.insert(obj, collection)
