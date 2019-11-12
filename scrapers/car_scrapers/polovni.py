@@ -6,9 +6,6 @@ from adapters.mongo_adapter import MongoAdapter
 
 class PolovniScrap(scrapy.Spider):
     name = 'polovni_scrap'
-    custom_settings = {
-        'DUPEFILTER_CLASS': "scrapy.dupefilters.BaseDupeFilter",
-    }
     allowed_domains = ['polovniautomobili.com']
     start_urls = [
         'https://www.polovniautomobili.com/auto-oglasi/pretraga?page=1&sort=basic&city_distance=0&showOldNew=all&without_price=1']
@@ -18,7 +15,6 @@ class PolovniScrap(scrapy.Spider):
     controller = CarContorller(storageCtl)
 
     def parse(self, response):
-        print("Existing settings: %s" % self.settings.attributes.keys())
         arr_urls = []
         tmpStr = response.css('div.js-hide-on-filter small::text').get()
         numE = int(re.search('Prikazano od 1 do 25 oglasa od ukupno ([0-9]*)', tmpStr).group(1))
