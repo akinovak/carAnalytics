@@ -13,7 +13,7 @@ db = my_client['cardb']
 
 def parse_collection(collection):
     for document in db[collection].find():
-        SoldController.check_object_on_website(document, collection)
+        controller.check_object_on_website(document, collection)
 
 
-parse_collection('polovni')
+parse_collection('cars')
