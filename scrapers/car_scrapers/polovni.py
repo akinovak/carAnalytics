@@ -1,8 +1,12 @@
 import scrapy, json, re, math, codecs, pymongo, datetime, time, sys, random
-
+import time
 from contorllers.scraper_contorler.car_controller.car_contoroller import CarContorller
 from contorllers.db_controllers.storage_controller import StorageController
 from adapters.mongo_adapter import MongoAdapter
+from scrapy.spidermiddlewares.httperror import HttpError
+from twisted.internet.error import DNSLookupError
+from twisted.internet.error import TimeoutError
+from conf import ctx
 
 
 class PolovniScrap(scrapy.Spider):
@@ -25,13 +29,15 @@ class PolovniScrap(scrapy.Spider):
 
         print("BROJ STRNICA: " + str(numPages))
 
-        for i in range(5):  # range(numPages):
+        for i in range(numPages):
+
             url = 'https://www.polovniautomobili.com/auto-oglasi/pretraga?page=' + str(
                 i + 1) + '&sort=basic&city_distance=0&showOldNew=all&without_price=1'
             arr_urls.append(url)
             yield scrapy.Request(
                 response.urljoin(url),
-                callback=self.parse_page
+                callback=self.parse_page,
+                errback=self.errback_httpbin
             )
 
     def parse_page(self, response):
@@ -41,9 +47,11 @@ class PolovniScrap(scrapy.Spider):
         carUrls = list(map(lambda x: 'https://www.polovniautomobili.com' + x, carUrls))
         print(carUrls)
         for url in carUrls:
+
             yield scrapy.Request(
                 response.urljoin(url),
-                callback=self.parse_car
+                callback=self.parse_car,
+                errback=self.errback_httpbin
             )
 
     def parse_price(self, response):
@@ -54,7 +62,7 @@ class PolovniScrap(scrapy.Spider):
             price = re.search(r'([0-9]*\.?[0-9]*)€', price).group(1)
 
         price = price.strip()
-        if price.isdecimal():
+        if price == 'Po dogovoru' or price == 'Na upit':
             price = -1
         else:
             first = re.search('([0-9]*)\.?[0-9]*', price)
@@ -147,3 +155,20 @@ class PolovniScrap(scrapy.Spider):
             err = open("err.txt", "a+")
             err.write("Unexpected error:" + str(e))
             err.close()
+
+
+    def errback_httpbin(self, failure):
+
+        self.logger.error(repr(failure))
+
+        if failure.check(HttpError):
+            response = failure.value.response
+            self.logger.error('HttpError on %s', response.url)
+
+        elif failure.check(DNSLookupError):
+            request = failure.request
+            self.logger.error('DNSLookupError on %s', request.url)
+
+        elif failure.check(TimeoutError):
+            request = failure.request
+            self.logger.error('TimeoutError on %s', request.url)
