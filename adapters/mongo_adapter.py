@@ -12,7 +12,7 @@ class MongoAdapter(StorageInterface):
         self.db[collection].insert_one(obj)
 
     def update_object(self, obj_match, obj_update, collection):
-        self.db[collection].update_one(obj_match, {"$set": obj_update})
+        self.db[collection].update_one(obj_match, obj_update)
 
     def delete_object(self, obj, collection):
         self.db[collection].delete_one(obj)

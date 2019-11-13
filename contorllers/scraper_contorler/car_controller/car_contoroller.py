@@ -1,3 +1,4 @@
+import time
 class CarContorller:
 
     def __init__(self, storage_controller):
@@ -8,7 +9,11 @@ class CarContorller:
         if x is None:
             return False
         else:
-            self.storage_controller.update({'link': obj['link']}, obj, collection)
+            ts = time.gmtime()
+            ts = time.strftime("%Y-%m-%d", ts)
+            self.storage_controller.update({'link': obj['link']},
+                                           {"$set": {'cena': obj['cena']}, "$push": {'istorija': {ts: obj['cena']} }},
+                                           collection)
             return True
 
     def insert_object(self, obj, collection):
