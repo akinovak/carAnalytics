@@ -30,7 +30,7 @@ class PolovniScrap(scrapy.Spider):
         print("BROJ STRNICA: " + str(numPages))
 
         for i in range(numPages):
-
+            time.sleep(10)
             url = 'https://www.polovniautomobili.com/auto-oglasi/pretraga?page=' + str(
                 i + 1) + '&sort=basic&city_distance=0&showOldNew=all&without_price=1'
             arr_urls.append(url)
@@ -48,7 +48,6 @@ class PolovniScrap(scrapy.Spider):
         carUrls = list(map(lambda x: 'https://www.polovniautomobili.com' + x, carUrls))
         print(carUrls)
         for url in carUrls:
-
             yield scrapy.Request(
                 response.urljoin(url),
                 callback=self.parse_car,
