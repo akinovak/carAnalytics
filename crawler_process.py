@@ -1,7 +1,6 @@
 from scrapers.car_scrapers.polovni import PolovniScrap
 from scrapy.crawler import CrawlerProcess
-import sys, time
-from scrapy.utils.project import get_project_settings
+import sys
 
 scrapers = [PolovniScrap]
 
@@ -12,6 +11,7 @@ def find_scraper(scraper_name, scrapers):
             return scraper
 
 
+print('Crawling started')
 process = CrawlerProcess()
 process.crawl(find_scraper(sys.argv[1], scrapers))
 process.start()

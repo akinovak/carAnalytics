@@ -1,5 +1,5 @@
 import scrapy, json, re, math, codecs, pymongo, datetime, time, sys, random
-import time
+import time, requests
 from contorllers.scraper_contorler.car_controller.car_contoroller import CarContorller
 from contorllers.db_controllers.storage_controller import StorageController
 from adapters.mongo_adapter import MongoAdapter
@@ -37,7 +37,8 @@ class PolovniScrap(scrapy.Spider):
             yield scrapy.Request(
                 response.urljoin(url),
                 callback=self.parse_page,
-                errback=self.errback_httpbin
+                errback=self.errback_httpbin,
+                dont_filter=True
             )
 
     def parse_page(self, response):
@@ -51,7 +52,8 @@ class PolovniScrap(scrapy.Spider):
             yield scrapy.Request(
                 response.urljoin(url),
                 callback=self.parse_car,
-                errback=self.errback_httpbin
+                errback=self.errback_httpbin,
+                dont_filter=True
             )
 
     def parse_price(self, response):
@@ -163,12 +165,21 @@ class PolovniScrap(scrapy.Spider):
 
         if failure.check(HttpError):
             response = failure.value.response
-            self.logger.error('HttpError on %s', response.url)
+            ctx.log.error('HttpError on %s', response.url)
+            # self.wait_for_page(response.url)
 
         elif failure.check(DNSLookupError):
             request = failure.request
-            self.logger.error('DNSLookupError on %s', request.url)
+            ctx.log.error('DNSLookupError on %s', request.url)
 
         elif failure.check(TimeoutError):
             request = failure.request
-            self.logger.error('TimeoutError on %s', request.url)
+            ctx.log.error('TimeoutError on %s', request.url)
+            # self.wait_for_page(request.url)
+
+    def wait_for_page(self, url):
+        while True:
+            r = requests.get(url)
+            if r.status_code == 200:
+                break
+            time.sleep(60*10)
