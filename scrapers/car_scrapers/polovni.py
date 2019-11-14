@@ -31,7 +31,7 @@ class PolovniScrap(scrapy.Spider):
 
         for i in range(numPages):
             url = 'https://www.polovniautomobili.com/auto-oglasi/pretraga?page=' + str(
-                i + 1) + '&sort=basic&city_distance=0&showOldNew=all&without_price=1'
+                i + 1) + '&sort=renewDate_desc&city_distance=0&showOldNew=all&without_price=1'
             arr_urls.append(url)
             yield scrapy.Request(
                 response.urljoin(url),
@@ -44,14 +44,19 @@ class PolovniScrap(scrapy.Spider):
         carUrls = response.css(
             'article.single-classified:not([class*="uk-hidden"]):not([class*="paid-0"]) h2 a::attr(href)').getall()
 
+        carRenewal = response.xpath('//i[has-class("uk-icon-calendar")]/../text()').getall()
+
+        renewal_dates = list(map(lambda x: x.split(':')[1].strip(), carRenewal))
+
         carUrls = list(map(lambda x: 'https://www.polovniautomobili.com' + x + '?show_date=true', carUrls))
-        print(carUrls)
-        for url in carUrls:
+        # print(carUrls)
+        for (i, url) in enumerate(carUrls, start=0):
             yield scrapy.Request(
                 response.urljoin(url),
                 callback=self.parse_car,
                 errback=self.errback_httpbin,
-                dont_filter=True
+                dont_filter=True,
+                meta={'renewal_date': renewal_dates[i]}
             )
 
     def parse_price(self, response):
@@ -99,11 +104,14 @@ class PolovniScrap(scrapy.Spider):
                 vals.append(arr[i])
 
         x = {}
+        renewal_date = response.meta.get('renewal_date')
+        datetime_object = datetime.datetime.strptime(renewal_date, '%d.%m.%Y.')
+        x['datum_obnove'] = datetime_object
         date_arr = sec[-1].split(':')
         date = date_arr[-1]
         date = date.strip()
         datetime_object = datetime.datetime.strptime(date, '%d.%m.%Y.')
-        x['datum'] = datetime_object
+        x['datum_postavke'] = datetime_object
 
         for i in range(len(keys)):
             if i < len(vals):
