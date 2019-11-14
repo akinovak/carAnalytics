@@ -13,7 +13,7 @@ class PolovniScrap(scrapy.Spider):
     name = 'polovni_scrap'
     allowed_domains = ['polovniautomobili.com']
     start_urls = [
-        'https://www.polovniautomobili.com/auto-oglasi/pretraga?page=1&sort=basic&city_distance=0&showOldNew=all&without_price=1']
+        'https://www.polovniautomobili.com/auto-oglasi/pretraga?page=1&sort=sort=renewDate_desc&city_distance=0&showOldNew=all&without_price=1']
     cars = []
     mongoAdp = MongoAdapter('mongodb://localhost:27017/', 'cardb')
     storageCtl = StorageController(mongoAdp)
@@ -30,7 +30,6 @@ class PolovniScrap(scrapy.Spider):
         print("BROJ STRNICA: " + str(numPages))
 
         for i in range(numPages):
-            time.sleep(10)
             url = 'https://www.polovniautomobili.com/auto-oglasi/pretraga?page=' + str(
                 i + 1) + '&sort=basic&city_distance=0&showOldNew=all&without_price=1'
             arr_urls.append(url)
@@ -45,7 +44,7 @@ class PolovniScrap(scrapy.Spider):
         carUrls = response.css(
             'article.single-classified:not([class*="uk-hidden"]):not([class*="paid-0"]) h2 a::attr(href)').getall()
 
-        carUrls = list(map(lambda x: 'https://www.polovniautomobili.com' + x, carUrls))
+        carUrls = list(map(lambda x: 'https://www.polovniautomobili.com' + x + '?show_date=true', carUrls))
         print(carUrls)
         for url in carUrls:
             yield scrapy.Request(
@@ -83,6 +82,8 @@ class PolovniScrap(scrapy.Spider):
             return
 
         sec = response.css('section.classified-content div div::text').getall()
+        # ctx.log.info(sec[-1])
+        # ctx.log.info(response.css('section.classified-content').getall())
         arr = []
         for s in sec:
             w = s.strip()
@@ -98,6 +99,11 @@ class PolovniScrap(scrapy.Spider):
                 vals.append(arr[i])
 
         x = {}
+        date_arr = sec[-1].split(':')
+        date = date_arr[-1]
+        date = date.strip()
+        datetime_object = datetime.datetime.strptime(date, '%d.%m.%Y.')
+        x['datum'] = datetime_object
 
         for i in range(len(keys)):
             if i < len(vals):

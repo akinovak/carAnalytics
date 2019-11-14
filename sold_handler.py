@@ -1,6 +1,6 @@
 import scrapy
 import pymongo
-import time
+import time, datetime
 
 from scrapy.spidermiddlewares.httperror import HttpError
 from twisted.internet.error import DNSLookupError
@@ -27,7 +27,11 @@ class SoldSpider(scrapy.Spider):
     def parse(self, response):
         if not isinstance(response.request.meta.get('redirect_urls'), type(None)):
             obj = response.meta.get('car')
-            sold_ctl.insert_to_sold(obj, self.collection)
+            delta = datetime.datetime.now() - obj['datum']
+            if delta.days < 30:
+                sold_ctl.insert_to_sold(obj, self.collection, 'sold')
+            else:
+                sold_ctl.insert_to_sold(obj, self.collection, 'expired')
 
     def errback_httpbin(self, failure):
         if failure.check(HttpError):
