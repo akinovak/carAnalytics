@@ -1,8 +1,9 @@
 from scrapers.car_scrapers.polovni import PolovniScrap
+from sold_handler import SoldSpider
 from scrapy.crawler import CrawlerProcess
 import sys
 
-scrapers = [PolovniScrap]
+scrapers = [PolovniScrap, SoldSpider]
 
 
 def find_scraper(scraper_name, scrapers):
