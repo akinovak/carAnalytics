@@ -12,7 +12,7 @@ class CarContorller:
             ts = time.gmtime()
             ts = time.strftime("%Y-%m-%d", ts)
             self.storage_controller.update({'link': obj['link']},
-                                           {"$set": {'cena': obj['cena']}, "$push": {'istorija': {ts: obj['cena']} }},
+                                           {"$set": {'cena': obj['cena'], 'datum_obnove': obj['datum_obnove']}, "$push":{'istorija': {ts: obj['cena']} }},
                                            collection)
             return True
 

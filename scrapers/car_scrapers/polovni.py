@@ -80,9 +80,11 @@ class PolovniScrap(scrapy.Spider):
         return price
 
     def parse_car(self, response):
+        renewal_date = response.meta.get('renewal_date')
+        datetime_object = datetime.datetime.strptime(renewal_date, '%d.%m.%Y.')
 
         price = self.parse_price(response)
-        exist = self.controller.check_object({'link': response.url, 'cena': price}, 'cars')
+        exist = self.controller.check_object({'link': response.url, 'cena': price, 'datum_obnove' : datetime_object}, 'cars')
         if exist:
             return
 
@@ -104,8 +106,7 @@ class PolovniScrap(scrapy.Spider):
                 vals.append(arr[i])
 
         x = {}
-        renewal_date = response.meta.get('renewal_date')
-        datetime_object = datetime.datetime.strptime(renewal_date, '%d.%m.%Y.')
+
         x['datum_obnove'] = datetime_object
         date_arr = sec[-1].split(':')
         date = date_arr[-1]
