@@ -27,7 +27,7 @@ class SoldSpider(scrapy.Spider):
     def parse(self, response):
         if not isinstance(response.request.meta.get('redirect_urls'), type(None)):
             obj = response.meta.get('car')
-            delta = datetime.datetime.now() - obj['datum']
+            delta = datetime.datetime.now() - obj['datum_obnove']
             if delta.days < 30:
                 sold_ctl.insert_to_sold(obj, self.collection, 'sold')
             else:
