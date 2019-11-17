@@ -18,6 +18,7 @@ class PolovniScrap(scrapy.Spider):
     mongoAdp = MongoAdapter('mongodb://localhost:27017/', 'cardb')
     storageCtl = StorageController(mongoAdp)
     controller = CarContorller(storageCtl)
+    download_delay = 2
 
     def parse(self, response):
         arr_urls = []
